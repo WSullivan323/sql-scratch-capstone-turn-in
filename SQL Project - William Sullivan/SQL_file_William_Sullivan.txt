@@ -1,0 +1,123 @@
+-- Question 1-- 
+
+-- Number of Unique Camapigns -- 
+SELECT COUNT (DISTINCT utm_campaign) AS 'Number of Camapigns'
+FROM page_visits;
+-- Number of Unique Sources -- 
+SELECT COUNT (DISTINCT utm_source) AS 'Number of Sources'
+FROM page_visits;
+-- Campaign and Source -- 
+SELECT DISTINCT utm_campaign as Campaign, 
+utm_source as Source
+FROM page_visits;
+
+-- Question 2-- 
+-- Pages-- 
+SELECT DISTINCT page_name
+FROM page_visits;
+
+-- QUESTION 3 -- 
+-- Create Table that identified first touch-- 
+WITH first_touch AS (
+    SELECT user_id,
+        MIN(timestamp) as first_touch_at
+    FROM page_visits
+    GROUP BY user_id),
+-- Join page visits --     
+ft_att AS (
+SELECT ft.user_id,
+   		 ft.first_touch_at,
+       pv.utm_campaign        
+FROM first_touch ft
+JOIN page_visits pv
+    ON ft.user_id = pv.user_id
+    AND ft.first_touch_at = pv.timestamp)
+-- # Users by Campaign Type [First Touch] --     
+SELECT ft_att.utm_campaign as campaign, 
+  COUNT(*) AS COUNT
+FROM ft_att
+GROUP BY 1
+ORDER BY 2
+
+-- Find Last Touch by User ID--
+WITH last_touch AS (
+  SELECT user_id, MAX(timestamp) as last_touch_att
+FROM page_visits
+WHERE page_name = '4 - purchase'
+GROUP BY user_id),
+-- Joins with Page visits-- 
+lt_att as (
+  SELECT lt.user_id,
+  			 lt.last_touch_att,
+  			 pv.utm_source,
+  			 pv.utm_campaign
+  FROM last_touch	lt
+  JOIN page_visits pv
+  on lt.user_id = pv.user_id
+  and lt.last_touch_att = pv.timestamp
+-- Count of number of Users-- 
+SELECT lt_att.utm_campaign,
+  	COUNT (*) as Number of Users 
+  FROM lt_att
+  GROUP BY 1
+  ORDER BY 2;
+
+- - Question 4 - - 
+
+-- Table to idenfitify Last Touch—
+
+WITH last_touch AS (
+SELECT user_id,
+ MAX(timestamp) AS last_touch_att
+FROM page_visits
+WHERE page_name = '4 - purchase'
+GROUP BY user_id),
+
+-- Join Last Touch and Page Visits—
+
+lt_att as (
+ SELECT lt.user_id,
+              lt.last_touch_att,
+              pv.utm_source,
+              pv.utm_campaign
+ FROM last_touch    lt
+ JOIN page_visits pv
+ on lt.user_id = pv.user_id
+ and lt.last_touch_att = pv.timestamp)
+
+
+
+-- 5. Count number of users by last touch attr.--
+
+SELECT lt_att.utm_campaign,
+     COUNT (*) as Number of Users
+ FROM lt_att
+ GROUP BY 1
+ ORDER BY 2; 
+
+
+— — Question 6 — — 
+-- Table to idenfitify Last Touch--
+WITH last_touch AS (
+SELECT user_id,
+ MAX(timestamp) AS last_touch_att
+FROM page_visits
+WHERE page_name = '4 - purchase'
+GROUP BY user_id),
+-- Join Last Touch and Page Visits--
+lt_att as (
+ SELECT lt.user_id,
+              lt.last_touch_att,
+              pv.utm_source,
+              pv.utm_campaign
+ FROM last_touch    lt
+ JOIN page_visits pv
+ on lt.user_id = pv.user_id
+ and lt.last_touch_att = pv.timestamp)
+-- Count number of users by last touch attr.--
+SELECT lt_att.utm_campaign,
+     COUNT (*) as "Number of Users"
+ FROM lt_att
+ GROUP BY 1
+ ORDER BY 2;
+
